@@ -2,8 +2,26 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
+import { getSettings } from "@/lib/supabase";
 
 export default function AdminNavbar() {
+  const [logo, setLogo] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await getSettings();
+        if (data?.logo) {
+          setLogo(data.logo);
+        }
+      } catch (e) {
+        console.error("Error loading settings:", e);
+      }
+    };
+    loadSettings();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     window.location.href = "/login";
@@ -36,30 +54,17 @@ export default function AdminNavbar() {
           {/* Logo */}
           <div className="flex justify-center flex-1 md:flex-none md:justify-start">
             <Link to="/admin" className="flex items-center">
-              {(() => {
-                try {
-                  const settings = localStorage.getItem("styleSettings");
-                  if (settings) {
-                    const { logo } = JSON.parse(settings);
-                    if (logo) {
-                      return (
-                        <img
-                          src={logo}
-                          alt="レストランロゴ"
-                          className="h-12 w-auto object-contain"
-                        />
-                      );
-                    }
-                  }
-                } catch (e) {
-                  console.error("Error parsing settings:", e);
-                }
-                return (
-                  <span className="text-2xl font-bold text-gray-900">
-                    CUBIERTA
-                  </span>
-                );
-              })()}
+              {logo ? (
+                <img
+                  src={logo}
+                  alt="レストランロゴ"
+                  className="h-12 w-auto object-contain"
+                />
+              ) : (
+                <span className="text-2xl font-bold text-gray-900">
+                  CUBIERTA
+                </span>
+              )}
             </Link>
           </div>
 

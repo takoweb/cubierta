@@ -108,6 +108,18 @@ const Home = () => {
             <Palette className="h-4 w-4" />
             {showSettings ? "デザイン設定を隠す" : "デザイン設定"}
           </Button>
+          <Button
+            variant="outline"
+            onClick={() =>
+              window.open(
+                "https://drive.google.com/drive/folders/17n0JnmAqx7szXpeMU6FG-dSMTUQw6Ivl?usp=drive_link",
+                "_blank",
+              )
+            }
+            className="flex items-center gap-2"
+          >
+            <span>レシピ</span>
+          </Button>
           {!editingDish && (
             <Button
               onClick={() => setShowForm(!showForm)}

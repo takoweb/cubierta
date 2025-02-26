@@ -53,21 +53,5 @@ export const saveVisitorData = () => {
   // Save to localStorage
   localStorage.setItem("viewsData", JSON.stringify(viewsData));
 
-  // Save to file
-  const formattedDate = `${year}-${String(Number(month) + 1).padStart(2, "0")}`;
-  const timeOfDay = timeSlot;
-  const data = `${formattedDate},${timeOfDay},${new Date().toISOString()}\n`;
-
-  // Create a Blob and download it
-  const blob = new Blob([data], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.style.display = "none";
-  a.href = url;
-  a.download = `visitor_data_${formattedDate}.csv`;
-
-  document.body.appendChild(a);
-  a.click();
-  window.URL.revokeObjectURL(url);
-  document.body.removeChild(a);
+  // No need to save to file, just store in localStorage
 };

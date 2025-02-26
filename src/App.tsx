@@ -20,6 +20,7 @@ function App() {
       }
     >
       <>
+        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <Routes>
           <Route path="/" element={<PublicFeed />} />
           <Route path="/login" element={<LoginForm />} />
@@ -33,7 +34,6 @@ function App() {
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
       </>
     </Suspense>
   );

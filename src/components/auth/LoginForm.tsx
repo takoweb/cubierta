@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const STAFF_CREDENTIALS = {
-  username: "Stanoz60487",
-  password: "54htr3265sre",
-};
+import { login } from "@/lib/auth";
 
 export default function LoginForm() {
   const navigate = useNavigate();
@@ -19,10 +15,7 @@ export default function LoginForm() {
     const username = formData.get("username") as string;
     const password = formData.get("password") as string;
 
-    if (
-      username === STAFF_CREDENTIALS.username &&
-      password === STAFF_CREDENTIALS.password
-    ) {
+    if (login(username, password)) {
       localStorage.setItem("isAuthenticated", "true");
       navigate("/admin");
     } else {
@@ -42,7 +35,7 @@ export default function LoginForm() {
               <Input
                 id="username"
                 name="username"
-                placeholder="スタッフID"
+                placeholder="ユーザー名"
                 required
               />
             </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 
-import { getDishes } from "@/lib/supabase";
+import { getDishes } from "@/lib/storage";
 
 const getTimeSlot = (hour: number) => {
   if (hour >= 11 && hour < 14) return "lunch";

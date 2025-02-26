@@ -33,27 +33,30 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex justify-center flex-1 md:flex-none md:justify-start">
             <Link to="/" className="flex items-center">
-              {localStorage.getItem("styleSettings") ? (
-                JSON.parse(localStorage.getItem("styleSettings") || "{}")
-                  .logo ? (
-                  <img
-                    src={
-                      JSON.parse(localStorage.getItem("styleSettings") || "{}")
-                        .logo
+              {(() => {
+                try {
+                  const settings = localStorage.getItem("styleSettings");
+                  if (settings) {
+                    const { logo } = JSON.parse(settings);
+                    if (logo) {
+                      return (
+                        <img
+                          src={logo}
+                          alt="Restaurant logo"
+                          className="h-12 w-auto object-contain"
+                        />
+                      );
                     }
-                    alt="Restaurant logo"
-                    className="h-12 w-auto object-contain"
-                  />
-                ) : (
+                  }
+                } catch (e) {
+                  console.error("Error parsing settings:", e);
+                }
+                return (
                   <span className="text-2xl font-bold text-gray-900">
                     CUBIERTA
                   </span>
-                )
-              ) : (
-                <span className="text-2xl font-bold text-gray-900">
-                  CUBIERTA
-                </span>
-              )}
+                );
+              })()}
             </Link>
           </div>
 

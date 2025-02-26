@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import { useRoutes, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/home";
 import LoginForm from "./components/auth/LoginForm";
 import PublicFeed from "./components/public/PublicFeed";
-import routes from "tempo-routes";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
@@ -19,23 +18,20 @@ function App() {
         </div>
       }
     >
-      <>
-        {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
-        <Routes>
-          <Route index element={<PublicFeed />} />
-          <Route path="/" element={<PublicFeed />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <Home />
-              </PrivateRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </>
+      <Routes>
+        <Route index element={<PublicFeed />} />
+        <Route path="/" element={<PublicFeed />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Suspense>
   );
 }

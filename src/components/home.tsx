@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getDishes, saveDish } from "@/lib/supabase";
+import { getDishes, saveDish, uploadImage } from "@/lib/storage";
 import DishForm from "./DishForm";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Pencil, Trash2, Palette } from "lucide-react";

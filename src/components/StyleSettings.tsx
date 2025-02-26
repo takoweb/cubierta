@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { saveSettings, getSettings } from "@/lib/supabase";
+import { saveSettings, getSettings, uploadImage } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -80,7 +80,7 @@ export default function StyleSettings() {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const publicUrl = await uploadImage(file, "settings");
+        const publicUrl = await uploadImage(file);
         setSettings((prev) => ({ ...prev, logo: publicUrl }));
       } catch (error) {
         console.error("Error uploading logo:", error);

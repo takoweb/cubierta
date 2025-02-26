@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { uploadImage } from "@/lib/supabase";
+import { uploadImage } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
@@ -54,7 +54,7 @@ export default function DishForm({
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const publicUrl = await uploadImage(file, "dishes");
+        const publicUrl = await uploadImage(file);
         setImagePreview(publicUrl);
       } catch (error) {
         console.error("Error uploading image:", error);

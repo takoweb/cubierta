@@ -49,14 +49,15 @@ export default function DishForm({
     onSubmit(dish);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const publicUrl = await uploadImage(file, "dishes");
+        setImagePreview(publicUrl);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
     }
   };
 

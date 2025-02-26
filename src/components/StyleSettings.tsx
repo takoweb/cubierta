@@ -51,34 +51,51 @@ const FONTS = [
 ];
 
 export default function StyleSettings() {
-  const [settings, setSettings] = useState<StyleSettings>(() => {
-    const saved = localStorage.getItem("styleSettings");
-    return saved
-      ? JSON.parse(saved)
-      : {
-          primaryColor: "#1a1a1a",
-          secondaryColor: "#4a4a4a",
-          fontFamily: "Inter",
-          titleSize: "24px",
-          textSize: "16px",
-          logo: "",
-          backgroundImage: "",
-        };
+  const [settings, setSettings] = useState<StyleSettings>({
+    primaryColor: "#1a1a1a",
+    secondaryColor: "#4a4a4a",
+    fontFamily: "Inter",
+    titleSize: "24px",
+    textSize: "16px",
+    logo: "",
+    backgroundImage: "",
   });
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await getSettings();
+        if (data) {
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSettings((prev) => ({ ...prev, logo: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        const publicUrl = await uploadImage(file, "settings");
+        setSettings((prev) => ({ ...prev, logo: publicUrl }));
+      } catch (error) {
+        console.error("Error uploading logo:", error);
+      }
     }
   };
 
   useEffect(() => {
-    localStorage.setItem("styleSettings", JSON.stringify(settings));
+    const updateSettings = async () => {
+      try {
+        await saveSettings(settings);
+      } catch (error) {
+        console.error("Error saving settings:", error);
+      }
+    };
+    updateSettings();
     document.documentElement.style.setProperty(
       "--primary-color",
       settings.primaryColor,

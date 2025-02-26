@@ -23,22 +23,25 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const savedDishes = localStorage.getItem("dishes");
-    if (savedDishes) {
-      setDishes(JSON.parse(savedDishes));
-    }
+    const loadDishes = async () => {
+      try {
+        const data = await getDishes();
+        setDishes(data);
+      } catch (error) {
+        console.error("Error loading dishes:", error);
+      }
+    };
+    loadDishes();
   }, []);
 
-  const handleAddDish = (dish: Omit<Dish, "id">) => {
-    const newDish = {
-      ...dish,
-      id: Date.now().toString(),
-    };
-
-    const updatedDishes = [...dishes, newDish];
-    setDishes(updatedDishes);
-    localStorage.setItem("dishes", JSON.stringify(updatedDishes));
-    setShowForm(false);
+  const handleAddDish = async (dish: Omit<Dish, "id" | "created_at">) => {
+    try {
+      const newDish = await saveDish(dish);
+      setDishes((prev) => [...prev, newDish]);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error adding dish:", error);
+    }
   };
 
   const handleEditDish = (dish: Omit<Dish, "id">) => {

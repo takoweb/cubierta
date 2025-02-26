@@ -3,10 +3,7 @@ import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const getDishes = () => {
-  const savedDishes = localStorage.getItem("dishes");
-  return savedDishes ? JSON.parse(savedDishes) : [];
-};
+import { getDishes as getSupabaseDishes } from "@/lib/supabase";
 
 const getTimeSlot = (hour: number) => {
   if (hour >= 11 && hour < 14) return "lunch";
@@ -20,7 +17,15 @@ export default function PublicFeed() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setDishes(getDishes());
+    const loadDishes = async () => {
+      try {
+        const data = await getSupabaseDishes();
+        setDishes(data);
+      } catch (error) {
+        console.error("Error loading dishes:", error);
+      }
+    };
+    loadDishes();
     setLoading(false);
   }, []);
 

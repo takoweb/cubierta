@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadImage } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getDishes, saveDish } from "@/lib/supabase";
 import DishForm from "./DishForm";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Pencil, Trash2, Palette } from "lucide-react";
@@ -35,6 +36,7 @@ const Home = () => {
   }, []);
 
   const handleAddDish = async (dish: Omit<Dish, "id" | "created_at">) => {
+    console.log("Adding new dish:", dish);
     try {
       const newDish = await saveDish(dish);
       setDishes((prev) => [...prev, newDish]);

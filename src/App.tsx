@@ -22,6 +22,7 @@ function App() {
       <>
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
         <Routes>
+          <Route index element={<PublicFeed />} />
           <Route path="/" element={<PublicFeed />} />
           <Route path="/login" element={<LoginForm />} />
           <Route

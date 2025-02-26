@@ -2,9 +2,24 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
+import { getSettings, type StyleSettings } from "@/lib/supabase";
 
 export default function Navbar() {
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const [settings, setSettings] = useState<StyleSettings | null>(null);
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await getSettings();
+        setSettings(data);
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+    loadSettings();
+  }, []);
 
   const NavItems = () => (
     <>
@@ -33,30 +48,17 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex justify-center flex-1 md:flex-none md:justify-start">
             <Link to="/" className="flex items-center">
-              {(() => {
-                try {
-                  const settings = localStorage.getItem("styleSettings");
-                  if (settings) {
-                    const { logo } = JSON.parse(settings);
-                    if (logo) {
-                      return (
-                        <img
-                          src={logo}
-                          alt="Restaurant logo"
-                          className="h-12 w-auto object-contain"
-                        />
-                      );
-                    }
-                  }
-                } catch (e) {
-                  console.error("Error parsing settings:", e);
-                }
-                return (
-                  <span className="text-2xl font-bold text-gray-900">
-                    CUBIERTA
-                  </span>
-                );
-              })()}
+              {settings?.logo ? (
+                <img
+                  src={settings.logo}
+                  alt="Restaurant logo"
+                  className="h-12 w-auto object-contain"
+                />
+              ) : (
+                <span className="text-2xl font-bold text-gray-900">
+                  CUBIERTA
+                </span>
+              )}
             </Link>
           </div>
 

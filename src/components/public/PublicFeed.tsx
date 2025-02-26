@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { getDishes } from "@/lib/supabase";
+import { getDishes, getSettings, type StyleSettings } from "@/lib/supabase";
 
 const getTimeSlot = (hour: number) => {
   if (hour >= 11 && hour < 14) return "lunch";
@@ -15,17 +15,25 @@ const getTimeSlot = (hour: number) => {
 export default function PublicFeed() {
   const [dishes, setDishes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<StyleSettings | null>(null);
 
   useEffect(() => {
-    try {
-      const data = await getDishes();
-      setDishes(data || []);
-    } catch (error) {
-      console.error("Error loading dishes:", error);
-      setDishes([]);
-    } finally {
-      setLoading(false);
-    }
+    const fetchData = async () => {
+      try {
+        const [dishesData, settingsData] = await Promise.all([
+          getDishes(),
+          getSettings(),
+        ]);
+        setDishes(dishesData || []);
+        setSettings(settingsData);
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setDishes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -44,11 +52,8 @@ export default function PublicFeed() {
         <div
           className="fixed inset-0"
           style={{
-            backgroundImage: localStorage.getItem("styleSettings")
-              ? JSON.parse(localStorage.getItem("styleSettings") || "{}")
-                  .backgroundImage
-                ? `url(${JSON.parse(localStorage.getItem("styleSettings") || "{}").backgroundImage})`
-                : undefined
+            backgroundImage: settings?.backgroundImage
+              ? `url(${settings.backgroundImage})`
               : undefined,
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -59,20 +64,15 @@ export default function PublicFeed() {
         <div className="relative z-10">
           <Navbar />
           <div className="max-w-6xl mx-auto px-4 py-8 relative">
-            {localStorage.getItem("styleSettings") &&
-              JSON.parse(localStorage.getItem("styleSettings") || "{}")
-                .backgroundImage && (
-                <div className="absolute inset-0 bg-black/40 -mx-4 -my-8" />
-              )}
+            {settings?.backgroundImage && (
+              <div className="absolute inset-0 bg-black/40 -mx-4 -my-8" />
+            )}
             <h1
               className="text-3xl font-bold text-center mb-8 relative"
               style={{
-                color:
-                  localStorage.getItem("styleSettings") &&
-                  JSON.parse(localStorage.getItem("styleSettings") || "{}")
-                    .backgroundImage
-                    ? "white"
-                    : "var(--primary-color)",
+                color: settings?.backgroundImage
+                  ? "white"
+                  : settings?.primaryColor || "var(--primary-color)",
               }}
             >
               メニュー

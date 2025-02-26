@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { saveSettings, getSettings, uploadImage } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -51,73 +51,107 @@ const FONTS = [
   "Ubuntu",
 ];
 
-export default function StyleSettings() {
-  const [settings, setSettings] = useState<StyleSettings>({
-    primaryColor: "#1a1a1a",
-    secondaryColor: "#4a4a4a",
-    fontFamily: "Inter",
-    titleSize: "24px",
-    textSize: "16px",
-    logo: "",
-    backgroundImage: "",
-  });
+const DEFAULT_SETTINGS: StyleSettings = {
+  primaryColor: "#1a1a1a",
+  secondaryColor: "#4a4a4a",
+  fontFamily: "Inter",
+  titleSize: "24px",
+  textSize: "16px",
+  logo: "",
+  backgroundImage: "",
+};
 
-  useEffect(() => {
-    const loadSettings = async () => {
+export default function StyleSettings() {
+  const [settings, setSettings] = useState<StyleSettings>(DEFAULT_SETTINGS);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const loadSettings = useCallback(async () => {
+    try {
+      setLoading(true);
       const data = await getSettings();
       if (data) {
         setSettings(data);
       }
-    };
-    loadSettings();
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  const handleSaveSettings = async (newSettings: StyleSettings) => {
+    try {
+      await saveSettings(newSettings);
+      setSettings(newSettings);
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      // Reload settings in case of error
+      loadSettings();
+    }
+  };
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const publicUrl = await uploadImage(file, "settings");
-        setSettings((prev) => ({ ...prev, logo: publicUrl }));
+        setUploading(true);
+        const publicUrl = await uploadImage(file, "logos");
+        const newSettings = { ...settings, logo: publicUrl };
+        await handleSaveSettings(newSettings);
       } catch (error) {
         console.error("Error uploading logo:", error);
+      } finally {
+        setUploading(false);
       }
     }
   };
 
-  useEffect(() => {
-    saveSettings(settings);
-    document.documentElement.style.setProperty(
-      "--primary-color",
-      settings.primaryColor,
-    );
-    document.documentElement.style.setProperty(
-      "--secondary-color",
-      settings.secondaryColor,
-    );
-    document.documentElement.style.setProperty(
-      "--font-family",
-      settings.fontFamily,
-    );
-    document.documentElement.style.setProperty(
-      "--title-size",
-      settings.titleSize,
-    );
-    document.documentElement.style.setProperty(
-      "--text-size",
-      settings.textSize,
-    );
-  }, [settings]);
+  const handleBackgroundUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        setUploading(true);
+        const publicUrl = await uploadImage(file, "backgrounds");
+        const newSettings = { ...settings, backgroundImage: publicUrl };
+        await handleSaveSettings(newSettings);
+      } catch (error) {
+        console.error("Error uploading background:", error);
+      } finally {
+        setUploading(false);
+      }
+    }
+  };
 
-  const handleColorChange = (colorSet: {
+  const handleColorChange = async (colorSet: {
     primary: string;
     secondary: string;
   }) => {
-    setSettings((prev) => ({
-      ...prev,
+    const newSettings = {
+      ...settings,
       primaryColor: colorSet.primary,
       secondaryColor: colorSet.secondary,
-    }));
+    };
+    await handleSaveSettings(newSettings);
   };
+
+  const handleSettingChange = async (
+    key: keyof StyleSettings,
+    value: string,
+  ) => {
+    const newSettings = { ...settings, [key]: value };
+    await handleSaveSettings(newSettings);
+  };
+
+  if (loading) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -133,6 +167,7 @@ export default function StyleSettings() {
                 key={color.name}
                 onClick={() => handleColorChange(color)}
                 className={`group relative rounded-lg p-2 hover:bg-gray-100 transition-colors ${settings.primaryColor === color.primary ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                disabled={uploading}
               >
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex flex-col gap-1">
@@ -156,9 +191,8 @@ export default function StyleSettings() {
           <Label>{t("fontFamily")}</Label>
           <Select
             value={settings.fontFamily}
-            onValueChange={(value) =>
-              setSettings((prev) => ({ ...prev, fontFamily: value }))
-            }
+            onValueChange={(value) => handleSettingChange("fontFamily", value)}
+            disabled={uploading}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("selectFont")} />
@@ -177,9 +211,8 @@ export default function StyleSettings() {
           <Label>{t("titleSize")}</Label>
           <Select
             value={settings.titleSize}
-            onValueChange={(value) =>
-              setSettings((prev) => ({ ...prev, titleSize: value }))
-            }
+            onValueChange={(value) => handleSettingChange("titleSize", value)}
+            disabled={uploading}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("selectTitleSize")} />
@@ -197,9 +230,8 @@ export default function StyleSettings() {
           <Label>{t("textSize")}</Label>
           <Select
             value={settings.textSize}
-            onValueChange={(value) =>
-              setSettings((prev) => ({ ...prev, textSize: value }))
-            }
+            onValueChange={(value) => handleSettingChange("textSize", value)}
+            disabled={uploading}
           >
             <SelectTrigger>
               <SelectValue placeholder={t("selectTextSize")} />
@@ -221,6 +253,7 @@ export default function StyleSettings() {
               accept="image/*"
               onChange={handleLogoUpload}
               className="cursor-pointer"
+              disabled={uploading}
             />
             {settings.logo && (
               <div className="relative w-40 h-16">
@@ -233,7 +266,8 @@ export default function StyleSettings() {
                   variant="destructive"
                   size="sm"
                   className="absolute -top-2 -right-2"
-                  onClick={() => setSettings((prev) => ({ ...prev, logo: "" }))}
+                  onClick={() => handleSettingChange("logo", "")}
+                  disabled={uploading}
                 >
                   {t("remove")}
                 </Button>
@@ -248,20 +282,9 @@ export default function StyleSettings() {
             <Input
               type="file"
               accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setSettings((prev) => ({
-                      ...prev,
-                      backgroundImage: reader.result as string,
-                    }));
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
+              onChange={handleBackgroundUpload}
               className="cursor-pointer"
+              disabled={uploading}
             />
             {settings.backgroundImage && (
               <div className="relative w-full h-32">
@@ -274,9 +297,8 @@ export default function StyleSettings() {
                   variant="destructive"
                   size="sm"
                   className="absolute -top-2 -right-2"
-                  onClick={() =>
-                    setSettings((prev) => ({ ...prev, backgroundImage: "" }))
-                  }
+                  onClick={() => handleSettingChange("backgroundImage", "")}
+                  disabled={uploading}
                 >
                   {t("remove")}
                 </Button>

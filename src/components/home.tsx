@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getDishes, saveDish, uploadImage } from "@/lib/storage";
+import { getDishes, saveDish, uploadImage } from "@/lib/supabase";
 import DishForm from "./DishForm";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Pencil, Trash2, Palette } from "lucide-react";
@@ -27,7 +27,7 @@ const Home = () => {
     const loadDishes = async () => {
       try {
         const data = await getDishes();
-        setDishes(data);
+        setDishes(data || []);
       } catch (error) {
         console.error("Error loading dishes:", error);
       }
@@ -35,8 +35,7 @@ const Home = () => {
     loadDishes();
   }, []);
 
-  const handleAddDish = async (dish: Omit<Dish, "id" | "created_at">) => {
-    console.log("Adding new dish:", dish);
+  const handleAddDish = async (dish: Omit<Dish, "id">) => {
     try {
       const newDish = await saveDish(dish);
       setDishes((prev) => [...prev, newDish]);
@@ -46,22 +45,38 @@ const Home = () => {
     }
   };
 
-  const handleEditDish = (dish: Omit<Dish, "id">) => {
+  const handleEditDish = async (dish: Omit<Dish, "id">) => {
     if (!editingDish) return;
 
-    const updatedDishes = dishes.map((d) =>
-      d.id === editingDish.id ? { ...dish, id: editingDish.id } : d,
-    );
+    try {
+      const { data, error } = await supabase
+        .from("dishes")
+        .update({ ...dish })
+        .eq("id", editingDish.id)
+        .select()
+        .single();
 
-    setDishes(updatedDishes);
-    localStorage.setItem("dishes", JSON.stringify(updatedDishes));
-    setEditingDish(null);
+      if (error) throw error;
+
+      setDishes((prev) =>
+        prev.map((d) => (d.id === editingDish.id ? data : d)),
+      );
+      setEditingDish(null);
+    } catch (error) {
+      console.error("Error updating dish:", error);
+    }
   };
 
-  const handleDeleteDish = (id: string) => {
-    const updatedDishes = dishes.filter((dish) => dish.id !== id);
-    setDishes(updatedDishes);
-    localStorage.setItem("dishes", JSON.stringify(updatedDishes));
+  const handleDeleteDish = async (id: string) => {
+    try {
+      const { error } = await supabase.from("dishes").delete().eq("id", id);
+
+      if (error) throw error;
+
+      setDishes((prev) => prev.filter((dish) => dish.id !== id));
+    } catch (error) {
+      console.error("Error deleting dish:", error);
+    }
   };
 
   const startEditing = (dish: Dish) => {

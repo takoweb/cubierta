@@ -3,8 +3,7 @@ import Navbar from "./Navbar";
 import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-
-import { getDishes } from "@/lib/storage";
+import { getDishes } from "@/lib/supabase";
 
 const getTimeSlot = (hour: number) => {
   if (hour >= 11 && hour < 14) return "lunch";
@@ -18,20 +17,15 @@ export default function PublicFeed() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadDishes = async () => {
-      try {
-        // Try to get dishes from either Supabase or localStorage
-        const data = await getDishes();
-        setDishes(data || []);
-      } catch (error) {
-        console.error("Error loading dishes:", error);
-        // If all fails, set empty array
-        setDishes([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadDishes();
+    try {
+      const data = await getDishes();
+      setDishes(data || []);
+    } catch (error) {
+      console.error("Error loading dishes:", error);
+      setDishes([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {

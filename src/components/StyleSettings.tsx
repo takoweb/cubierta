@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { saveSettings, getSettings, uploadImage } from "@/lib/storage";
+import { saveSettings, getSettings, uploadImage } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -64,13 +64,9 @@ export default function StyleSettings() {
 
   useEffect(() => {
     const loadSettings = async () => {
-      try {
-        const data = await getSettings();
-        if (data) {
-          setSettings(data);
-        }
-      } catch (error) {
-        console.error("Error loading settings:", error);
+      const data = await getSettings();
+      if (data) {
+        setSettings(data);
       }
     };
     loadSettings();
@@ -80,7 +76,7 @@ export default function StyleSettings() {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const publicUrl = await uploadImage(file);
+        const publicUrl = await uploadImage(file, "settings");
         setSettings((prev) => ({ ...prev, logo: publicUrl }));
       } catch (error) {
         console.error("Error uploading logo:", error);
@@ -89,14 +85,7 @@ export default function StyleSettings() {
   };
 
   useEffect(() => {
-    const updateSettings = async () => {
-      try {
-        await saveSettings(settings);
-      } catch (error) {
-        console.error("Error saving settings:", error);
-      }
-    };
-    updateSettings();
+    saveSettings(settings);
     document.documentElement.style.setProperty(
       "--primary-color",
       settings.primaryColor,

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { getDishes, getSettings, type StyleSettings } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const getTimeSlot = (hour: number) => {
   if (hour >= 11 && hour < 14) return "lunch";

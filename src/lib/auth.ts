@@ -1,11 +1,22 @@
-const STAFF_CREDENTIALS = {
-  username: "admin",
-  password: "admin123",
-};
+import { supabase } from "./supabase";
 
-export const login = (username: string, password: string) => {
-  return (
-    username === STAFF_CREDENTIALS.username &&
-    password === STAFF_CREDENTIALS.password
-  );
+export const login = async (username: string, password: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("staff_credentials")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .single();
+
+    if (error) {
+      console.error("Login error:", error);
+      return false;
+    }
+
+    return !!data;
+  } catch (error) {
+    console.error("Login error:", error);
+    return false;
+  }
 };

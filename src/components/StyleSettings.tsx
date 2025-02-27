@@ -102,6 +102,7 @@ export default function StyleSettings() {
         setUploading(true);
         const publicUrl = await uploadImage(file, "logos");
         const newSettings = { ...settings, logo: publicUrl };
+        setSettings(newSettings); // Update local state immediately
         await handleSaveSettings(newSettings);
       } catch (error) {
         console.error("Error uploading logo:", error);
@@ -120,6 +121,7 @@ export default function StyleSettings() {
         setUploading(true);
         const publicUrl = await uploadImage(file, "backgrounds");
         const newSettings = { ...settings, backgroundImage: publicUrl };
+        setSettings(newSettings); // Update local state immediately
         await handleSaveSettings(newSettings);
       } catch (error) {
         console.error("Error uploading background:", error);

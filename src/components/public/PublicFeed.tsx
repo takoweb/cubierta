@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loading } from "@/components/ui/loading";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { getDishes, getSettings, type StyleSettings } from "@/lib/supabase";
+import InfoSection from "@/components/InfoSection";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -65,6 +66,7 @@ export default function PublicFeed() {
         />
         <div className="relative z-10">
           <Navbar />
+          <InfoSection />
           <div className="max-w-6xl mx-auto px-4 py-8 relative">
             {settings?.backgroundImage && (
               <div className="absolute inset-0 bg-black/40 -mx-4 -my-8" />
